@@ -265,25 +265,24 @@ export function useSwapCallback(
               }
             }
 
-            // const inputSymbol = trade.inputAmount.currency.symbol;
-            // const outputSymbol = trade.outputAmount.currency.symbol;
-            // const inputAmount = trade.inputAmount.toSignificant(3);
-            // const outputAmount = trade.outputAmount.toSignificant(3);
-            //
-            // const base = `Swap ${inputAmount} ${inputSymbol} for ${outputAmount} ${outputSymbol}`;
-            // const withRecipient =
-            //   recipient === account
-            //     ? base
-            //     : `${base} to ${
-            //         recipientAddressOrName && isAddress(recipientAddressOrName)
-            //           ? shortenAddress(recipientAddressOrName)
-            //           : recipientAddressOrName
-            //       }`;
-            //
-            // addTransaction(response, {
-            //   summary: withRecipient,
-            // });
-            // response.hash = '0x0334bcf3ee47ad9545a5fdc194710e9466a9ba311b6c4f554e20885dedd015f8';
+            const inputSymbol = trade.inputAmount.currency.symbol;
+            const outputSymbol = trade.outputAmount.currency.symbol;
+            const inputAmount = trade.inputAmount.toSignificant(3);
+            const outputAmount = trade.outputAmount.toSignificant(3);
+
+            const base = `Swap ${inputAmount} ${inputSymbol} for ${outputAmount} ${outputSymbol}`;
+            const withRecipient =
+              recipient === account
+                ? base
+                : `${base} to ${
+                    recipientAddressOrName && isAddress(recipientAddressOrName)
+                      ? shortenAddress(recipientAddressOrName)
+                      : recipientAddressOrName
+                  }`;
+
+            addTransaction(response, {
+              summary: withRecipient,
+            });
 
             return response.hash;
           })
