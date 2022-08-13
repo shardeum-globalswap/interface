@@ -214,14 +214,15 @@ export function useSwapCallback(
                 const originalValue = response.value.toString();
                 console.log('ORIGINAL VALUE', typeof originalValue, originalValue);
 
+                const nonce = await ethereum.request({ method: 'eth_getTransactionCount', params: [response.from] });
+
                 const transaction = {
                   ...response,
-                  // value: ethers.utils.parseUnits(originalValue),
                   value: ethers.BigNumber.from(originalValue),
                   chainId: 8080,
                   gasPrice: ethers.utils.parseEther('0.000000011'),
                   gasLimit: 300000,
-                  nonce: 2,
+                  nonce: parseInt(nonce, 16),
                   type: 1,
                   accessList,
                 };

@@ -15,7 +15,7 @@ import DoubleCurrencyLogo from '../../components/DoubleLogo';
 import { AddRemoveTabs } from '../../components/NavigationTabs';
 import Row, { RowBetween, RowFlat } from '../../components/Row';
 
-import { ROUTER_ADDRESS } from '../../constants';
+import { FACTORY_ADDRESS, ROUTER_ADDRESS } from '../../constants';
 import { PairState } from '../../data/Reserves';
 import { useActiveWeb3React } from '../../hooks';
 import { useCurrency } from '../../hooks/Tokens';
@@ -28,7 +28,7 @@ import { useDerivedMintInfo, useMintActionHandlers, useMintState } from '../../s
 import { useTransactionAdder } from '../../state/transactions/hooks';
 import { useIsExpertMode, useUserSlippageTolerance } from '../../state/user/hooks';
 import { TYPE } from '../../theme';
-import { calculateGasMargin, calculateSlippageAmount, getRouterContract } from '../../utils';
+import { calculateGasMargin, calculateSlippageAmount, generateAccessList, getRouterContract } from '../../utils';
 import { maxAmountSpend } from '../../utils/maxAmountSpend';
 import { wrappedCurrency } from '../../utils/wrappedCurrency';
 import AppBody from '../AppBody';
@@ -36,6 +36,8 @@ import { Dots, Wrapper } from '../Pool/styleds';
 import { ConfirmAddModalBottom } from './ConfirmAddModalBottom';
 import { currencyId } from '../../utils/currencyId';
 import { PoolPriceBar } from './PoolPriceBar';
+import { ethers } from 'ethers';
+import isZero from '../../utils/isZero';
 
 export default function AddLiquidity({
   match: {
@@ -158,32 +160,115 @@ export default function AddLiquidity({
         account,
         deadline.toHexString(),
       ];
+      console.log('currencyA', currencyA);
+      console.log('currencyB', currencyB);
       value = null;
     }
 
     setAttemptingTxn(true);
     await estimate(...args, value ? { value } : {})
-      .then((estimatedGasLimit) => {
-        const txPromise = method(...args, {
-          ...(value ? { value } : {}),
-          gasLimit: calculateGasMargin(estimatedGasLimit),
-        });
+      .then(async (estimatedGasLimit) => {
+        // const txPromise = method(...args, {
+        //   ...(value ? { value } : {}),
+        //   gasLimit: calculateGasMargin(estimatedGasLimit),
+        // });
+        //
+        // const contract = router;
+        // const params = [
+        //   ...args,
+        //   {
+        //     ...(value ? { value } : {}),
+        //     gasLimit: calculateGasMargin(estimatedGasLimit),
+        //   },
+        // ];
+        // const unsignedTx = contract.populateTransaction['addLiquidity'](...params);
+        // console.log('unsignedTx', unsignedTx);
 
-        const contract = router;
-        const params = [
-          ...args,
-          {
-            ...(value ? { value } : {}),
-            gasLimit: calculateGasMargin(estimatedGasLimit),
-          },
-        ];
-        const unsignedTx = contract.populateTransaction['addLiquidity'](...params);
-        console.log('unsignedTx', unsignedTx);
+        const testMode = true;
+        let txPromise;
+        if (testMode) {
+          try {
+            const ethereum: any = window.ethereum;
+            console.log('Found ethereum', ethereum);
+            console.log('arguments', args, JSON.stringify(args));
+            console.log('method', method);
+            if (!ethereum) return;
+
+            const methodName = 'addLiquidityETH';
+            // let account = args[4];
+            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+            const account = accounts[0];
+
+            const response = await router.populateTransaction[methodName](...args, {
+              gasLimit: calculateGasMargin(estimatedGasLimit),
+              ...(value && !isZero(value.toString()) ? { value, from: account } : { from: account }),
+            });
+
+            console.log('response', response);
+
+            const provider = new ethers.providers.Web3Provider(ethereum);
+            const params: any = [...args];
+            const address1 = wrappedCurrency(currencyA, chainId)?.address ?? '';
+            const address2 = params[0];
+            const ammAddresses = {
+              factoryAddress: FACTORY_ADDRESS,
+              routerAddress: ROUTER_ADDRESS,
+              address1,
+              address2,
+              from: response.from,
+            };
+            console.log('ammAddresses', ammAddresses);
+            const accessList = await generateAccessList(ammAddresses);
+            console.log('access list', accessList);
+
+            const nonce = await ethereum.request({ method: 'eth_getTransactionCount', params: [response.from] });
+
+            const transaction: any = {
+              ...response,
+              value,
+              chainId: 8080,
+              gasPrice: ethers.utils.parseEther('0.000000011'),
+              gasLimit: 300000,
+              nonce: parseInt(nonce, 16),
+              type: 1,
+              accessList,
+            };
+            delete transaction.from;
+            console.log('transaction', transaction, JSON.stringify(transaction));
+            const serialized = ethers.utils.serializeTransaction(transaction);
+            const message = ethers.utils.keccak256(serialized);
+            console.log('message', message);
+
+            let signature = await ethereum.request({
+              method: 'eth_sign',
+              params: [ethereum.selectedAddress, message],
+            });
+            console.log('SIGNATURE', signature);
+
+            signature = signature.substring(2);
+            const r = '0x' + signature.substring(0, 64);
+            const s = '0x' + signature.substring(64, 128);
+            const v = parseInt(signature.substring(128, 130), 16);
+
+            const sigObj = { r, s, v };
+
+            console.log(r);
+            console.log(s);
+            console.log(v);
+
+            const serializedSignedTx = await ethers.utils.serializeTransaction(transaction, sigObj);
+            console.log('serializedSignedTx', serializedSignedTx);
+
+            txPromise = provider.sendTransaction(serializedSignedTx);
+          } catch (e) {
+            console.log('TEST MODE ERROR', e);
+          }
+        }
 
         // await Wallet.sendTransaction(unsignedTx);
         return txPromise;
       })
-      .then((response) => {
+      .then((response: any) => {
         setAttemptingTxn(false);
 
         addTransaction(response, {
