@@ -9,8 +9,8 @@ import {
 } from '../connectors';
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const FACTORY_ADDRESS = '0xf41704088e8F5DdCdE2E2BD30232b51473d70dfc';
-export const ROUTER_ADDRESS = '0x4f2CCd7c88CC7b9269164F58Fa1BEdDFC8d1aBc2';
+export const FACTORY_ADDRESS = '0x6723a053DFC22f4354e10f018d4484681C56BC48';
+export const ROUTER_ADDRESS = '0x4a5637Bf53992275B93Ff5e160669Ec5Ee9aB372';
 
 export const LP_TOKEN_NAME = 'GlobalSwap-Token';
 export const LP_TOKEN_SYMBOL = 'GBSWAP-LP';
@@ -22,7 +22,7 @@ type ChainTokenList = {
 
 export const DAI = new Token(
   ChainId.SHARDEUM,
-  '0x914907D9ED74e420D621B312a3F9487815D43d8b',
+  '0xEadcbd9115Eb06698ba6e1Cd7BB4C6381f9E6729',
   18,
   'DAI',
   'Dai Stablecoin'

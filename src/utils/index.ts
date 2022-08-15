@@ -14,11 +14,11 @@ import Web3 from 'web3';
 
 const codeHashMap: any = new Map();
 codeHashMap.set(
-  '0xB4C5dE217fF39924233FA3846478E68Fa11161AF',
+  '0x914907D9ED74e420D621B312a3F9487815D43d8b',
   '0xe215ad4f669e26abc5ebd692a4ae33cac42bbdbf1453033f490701c4533588bf'
 );
 codeHashMap.set(
-  '0x66c3ca101d1D83bb39CBA20EbF5F4D344Aa7514C',
+  '0xEadcbd9115Eb06698ba6e1Cd7BB4C6381f9E6729',
   '0x8066a4dac9c48b171b3aec8bfb10db23409617b8d8cc77acd57d766f7cc4f400'
 );
 
@@ -186,13 +186,12 @@ async function getContractCodeHash(contractAddress: string) {
 export async function generateAccessList(ammAddresses: any) {
   const { routerAddress, factoryAddress, address1, address2, from } = ammAddresses;
   const account = from;
-  const pairAddress = '0x5dfcb2a209f52f596c6586dce778b667bfa83726'
+  const pairAddress = '0xa6b8b5b1054c846febdb23d25ff00dedb571867c'
   // const pairAddress = getPair(address1, address2, factoryAddress, codeHash);
   // const pairHash = ethers.utils.keccak256(Buffer.from(PAIR.deployedBytecode.slice(2), 'hex'));
   const zeroAddress = '0x' + '0'.repeat(40);
   const balanceMapSlot = '0x1';
 
-  // const signer = 'test';
   // const allPairLength = (await getAllPairsLength(factoryAddress, signer)) || 1;
   const allPairLength = 1;
 
