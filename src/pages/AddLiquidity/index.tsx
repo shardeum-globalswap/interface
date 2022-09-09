@@ -184,18 +184,14 @@ export default function AddLiquidity({
         // const unsignedTx = contract.populateTransaction['addLiquidity'](...params);
         // console.log('unsignedTx', unsignedTx);
 
-        const testMode = true;
+        const isLiberty2 = true;
         let txPromise;
-        if (testMode) {
+        if (isLiberty2) {
           try {
             const ethereum: any = window.ethereum;
-            console.log('Found ethereum', ethereum);
-            console.log('arguments', args, JSON.stringify(args));
-            console.log('method', method);
             if (!ethereum) return;
 
             const methodName = 'addLiquidityETH';
-            // let account = args[4];
             const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
             const account = accounts[0];
 
@@ -203,8 +199,6 @@ export default function AddLiquidity({
               gasLimit: calculateGasMargin(estimatedGasLimit),
               ...(value && !isZero(value.toString()) ? { value, from: account } : { from: account }),
             });
-
-            console.log('response', response);
 
             const provider = new ethers.providers.Web3Provider(ethereum);
             const params: any = [...args];
@@ -217,9 +211,7 @@ export default function AddLiquidity({
               address2,
               from: response.from,
             };
-            console.log('tradeAddresses', tradeAddresses);
             const accessList = await generateAccessList(tradeAddresses);
-            console.log('access list', accessList);
 
             const nonce = await ethereum.request({ method: 'eth_getTransactionCount', params: [response.from] });
 
@@ -234,38 +226,28 @@ export default function AddLiquidity({
               accessList,
             };
             delete transaction.from;
-            console.log('transaction', transaction, JSON.stringify(transaction));
             const serialized = ethers.utils.serializeTransaction(transaction);
             const message = ethers.utils.keccak256(serialized);
-            console.log('message', message);
 
             let signature = await ethereum.request({
               method: 'eth_sign',
               params: [ethereum.selectedAddress, message],
             });
-            console.log('SIGNATURE', signature);
 
             signature = signature.substring(2);
             const r = '0x' + signature.substring(0, 64);
             const s = '0x' + signature.substring(64, 128);
             const v = parseInt(signature.substring(128, 130), 16);
-
             const sigObj = { r, s, v };
 
-            console.log(r);
-            console.log(s);
-            console.log(v);
-
             const serializedSignedTx = await ethers.utils.serializeTransaction(transaction, sigObj);
-            console.log('serializedSignedTx', serializedSignedTx);
 
             txPromise = provider.sendTransaction(serializedSignedTx);
           } catch (e) {
-            console.log('TEST MODE ERROR', e);
+            console.log('ERROR', e);
           }
         }
 
-        // await Wallet.sendTransaction(unsignedTx);
         return txPromise;
       })
       .then((response: any) => {
