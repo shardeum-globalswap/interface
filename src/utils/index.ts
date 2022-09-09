@@ -6,21 +6,15 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { abi as IUniswapV2Router02ABI } from '@uniswap/v2-periphery/build/IUniswapV2Router02.json';
 import { abi as factoryABI } from '@uniswap/v2-core/build/IUniswapV2Factory.json';
 import { abi as pairABI } from '@uniswap/v2-core/build/IUniswapV2Pair.json';
-import { ROUTER_ADDRESS } from '../constants';
+import { ROUTER_ADDRESS, ammAddresses } from '../constants';
 import { ChainId, Currency, CurrencyAmount, ETHER, JSBI, Percent, Token } from '@uniswap/sdk';
 import { TokenAddressMap } from '../state/lists/hooks';
 import { ethers } from 'ethers';
 import Web3 from 'web3';
 
 const codeHashMap: any = new Map();
-codeHashMap.set(
-  '0x914907D9ED74e420D621B312a3F9487815D43d8b',
-  '0xe215ad4f669e26abc5ebd692a4ae33cac42bbdbf1453033f490701c4533588bf'
-);
-codeHashMap.set(
-  '0xEadcbd9115Eb06698ba6e1Cd7BB4C6381f9E6729',
-  '0x8066a4dac9c48b171b3aec8bfb10db23409617b8d8cc77acd57d766f7cc4f400'
-);
+codeHashMap.set(ammAddresses.wethAddress, ammAddresses.wethCodeHash);
+codeHashMap.set(ammAddresses.daiAddress, ammAddresses.daiCodeHash);
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -45,7 +39,7 @@ export function getEtherscanLink(
   data: string,
   type: 'transaction' | 'token' | 'address' | 'block'
 ): string {
-  const prefix = `https://${ETHERSCAN_PREFIXES[chainId] || ETHERSCAN_PREFIXES[1]}etherscan.io`;
+  const prefix = `https://explorer.liberty20.shardeum.org`;
 
   switch (type) {
     case 'transaction': {
@@ -155,7 +149,7 @@ async function getAllPairsLength(factoryAddress: string, deployer: any) {
 
 function getPair(tokenA: string, tokenB: string, factory: string, codeHash: string) {
   if (!Web3) return;
-  const web3 = new Web3(Web3.givenProvider || 'http://localhost:8080');
+  const web3 = new Web3(Web3.givenProvider || 'https://liberty20.shardeum.org');
   const [token0, token1] = tokenA < tokenB ? [tokenA, tokenB] : [tokenB, tokenA];
 
   let abiEncoded1 = web3.eth.abi.encodeParameters(['address', 'address'], [token0, token1]);
@@ -165,8 +159,9 @@ function getPair(tokenA: string, tokenB: string, factory: string, codeHash: stri
   abiEncoded2 = abiEncoded2.split('0'.repeat(24)).join('').substr(2);
   if (!codeHash) return;
   let pairAddress;
-  if (Web3 !== null) pairAddress = Web3.givenProvider;
-  // if (Web3 !== null) pairAddress = Web3.utils.soliditySha3('0xff' + abiEncoded2, codeHash).substr(26);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  if (Web3) pairAddress = Web3.utils.soliditySha3('0xff' + abiEncoded2, codeHash).substr(26);
   if (pairAddress) return '0x' + pairAddress;
   else return null;
 }
@@ -174,20 +169,22 @@ function getPair(tokenA: string, tokenB: string, factory: string, codeHash: stri
 async function getContractCodeHash(contractAddress: string) {
   if (codeHashMap.has(contractAddress)) {
     return codeHashMap.get(contractAddress);
+  } else {
+    // const contractAccount: any = await getAccount(contractAddress);
+    // if (!contractAccount) {
+    //   return Buffer.from([]);
+    // }
+    // codeHashMap.set(contractAddress, contractAccount.codeHash);
+    // return contractAccount.codeHash;
   }
-  // const contractAccount: any = await getAccount(contractAddress);
-  // if (!contractAccount) {
-  //   return Buffer.from([]);
-  // }
-  // codeHashMap.set(contractAddress, contractAccount.codeHash);
-  // return contractAccount.codeHash;
 }
 
-export async function generateAccessList(ammAddresses: any) {
-  const { routerAddress, factoryAddress, address1, address2, from } = ammAddresses;
+export async function generateAccessList(tradeAddresses: any) {
+  const { routerAddress, factoryAddress, address1, address2, from } = tradeAddresses;
   const account = from;
-  const pairAddress = '0xa6b8b5b1054c846febdb23d25ff00dedb571867c'
-  // const pairAddress = getPair(address1, address2, factoryAddress, codeHash);
+  const pairAddress = getPair(address1, address2, factoryAddress, ammAddresses.codeHash);
+
+  console.log('Pair address', pairAddress);
   // const pairHash = ethers.utils.keccak256(Buffer.from(PAIR.deployedBytecode.slice(2), 'hex'));
   const zeroAddress = '0x' + '0'.repeat(40);
   const balanceMapSlot = '0x1';
@@ -252,6 +249,6 @@ export async function generateAccessList(ammAddresses: any) {
       ],
     ],
   ];
-  console.log(accessList)
+  console.log(accessList);
   return accessList;
 }

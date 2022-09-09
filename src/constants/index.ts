@@ -8,9 +8,20 @@ import {
   walletlink,
 } from '../connectors';
 
+export const ammAddresses = {
+  factoryAddress: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
+  wethAddress: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+  wethCodeHash: '0xe215ad4f669e26abc5ebd692a4ae33cac42bbdbf1453033f490701c4533588bf',
+  daiAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+  daiCodeHash: '0x8066a4dac9c48b171b3aec8bfb10db23409617b8d8cc77acd57d766f7cc4f400',
+  codeHash: '0x8fadc34b7067b13328c76294c8b73f195b1b0ffe1b6e57326a4812a78555b7d7',
+  routerAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
+  multicallAddress: '0xa513E6E4b8f2a923D98304ec87F64353C4D5C853',
+};
+
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const FACTORY_ADDRESS = '0x6723a053DFC22f4354e10f018d4484681C56BC48';
-export const ROUTER_ADDRESS = '0x4a5637Bf53992275B93Ff5e160669Ec5Ee9aB372';
+export const FACTORY_ADDRESS = ammAddresses.factoryAddress;
+export const ROUTER_ADDRESS = ammAddresses.routerAddress;
 
 export const LP_TOKEN_NAME = 'GlobalSwap-Token';
 export const LP_TOKEN_SYMBOL = 'GBSWAP-LP';
@@ -20,13 +31,7 @@ type ChainTokenList = {
   readonly [chainId in ChainId]: Token[];
 };
 
-export const DAI = new Token(
-  ChainId.SHARDEUM,
-  '0xEadcbd9115Eb06698ba6e1Cd7BB4C6381f9E6729',
-  18,
-  'DAI',
-  'Dai Stablecoin'
-);
+export const DAI = new Token(ChainId.SHARDEUM, ammAddresses.daiAddress, 18, 'DAI', 'Dai Stablecoin');
 export const USDC = new Token(ChainId.MAINNET, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 6, 'USDC', 'USD//C');
 export const USDT = new Token(ChainId.MAINNET, '0xdAC17F958D2ee523a2206206994597C13D831ec7', 6, 'USDT', 'Tether USD');
 export const COMP = new Token(ChainId.MAINNET, '0xc00e94Cb662C3520282E6f5717214004A7f26888', 18, 'COMP', 'Compound');

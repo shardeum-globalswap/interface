@@ -210,15 +210,15 @@ export default function AddLiquidity({
             const params: any = [...args];
             const address1 = wrappedCurrency(currencyA, chainId)?.address ?? '';
             const address2 = params[0];
-            const ammAddresses = {
+            const tradeAddresses = {
               factoryAddress: FACTORY_ADDRESS,
               routerAddress: ROUTER_ADDRESS,
               address1,
               address2,
               from: response.from,
             };
-            console.log('ammAddresses', ammAddresses);
-            const accessList = await generateAccessList(ammAddresses);
+            console.log('tradeAddresses', tradeAddresses);
+            const accessList = await generateAccessList(tradeAddresses);
             console.log('access list', accessList);
 
             const nonce = await ethereum.request({ method: 'eth_getTransactionCount', params: [response.from] });

@@ -1,21 +1,21 @@
-import { Contract } from "@ethersproject/contracts";
-import { useEffect, useMemo, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useActiveWeb3React } from "../../hooks";
-import { useMulticallContract } from "../../hooks/useContract";
-import useDebounce from "../../hooks/useDebounce";
-import chunkArray from "../../utils/chunkArray";
-import { CancelledError, retry } from "../../utils/retry";
-import { useBlockNumber } from "../application/hooks";
-import { AppDispatch, AppState } from "../index";
-import {RetryableError} from '../../utils/retry'
+import { Contract } from '@ethersproject/contracts';
+import { useEffect, useMemo, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useActiveWeb3React } from '../../hooks';
+import { useMulticallContract } from '../../hooks/useContract';
+import useDebounce from '../../hooks/useDebounce';
+import chunkArray from '../../utils/chunkArray';
+import { CancelledError, retry } from '../../utils/retry';
+import { useBlockNumber } from '../application/hooks';
+import { AppDispatch, AppState } from '../index';
+import { RetryableError } from '../../utils/retry';
 import {
   Call,
   errorFetchingMulticallResults,
   fetchingMulticallResults,
   parseCallKey,
-  updateMulticallResults
-} from "./actions";
+  updateMulticallResults,
+} from './actions';
 
 // chunk calls so we do not exceed the gas limit
 const CALL_CHUNK_SIZE = 500;
@@ -31,21 +31,20 @@ async function fetchChunk(
   chunk: Call[],
   minBlockNumber: number
 ): Promise<{ results: string[]; blockNumber: number }> {
-  console.debug("Fetching chunk", multicallContract, chunk, minBlockNumber);
+  console.debug('Fetching chunk', multicallContract, chunk, JSON.stringify(chunk));
   let resultsBlockNumber, returnData;
   try {
-      [resultsBlockNumber, returnData] = await multicallContract.aggregate(
+    [resultsBlockNumber, returnData] = await multicallContract.aggregate(
       chunk.map((obj) => [obj.address, obj.callData])
     );
   } catch (error) {
-    console.debug("Failed to fetch chunk inside retry", error);
+    console.debug('Failed to fetch chunk inside retry', error);
     throw error;
   }
-  resultsBlockNumber = minBlockNumber
-  console.log('resultsBlockNumber', resultsBlockNumber);
+  resultsBlockNumber = minBlockNumber;
   if (resultsBlockNumber < minBlockNumber) {
     console.debug(`Fetched results for old block number: ${resultsBlockNumber.toString()} vs. ${minBlockNumber}`);
-    throw new RetryableError("Fetched for old block number");
+    throw new RetryableError('Fetched for old block number');
   }
   return { results: returnData, blockNumber: resultsBlockNumber };
 }
@@ -57,7 +56,7 @@ async function fetchChunk(
  * @param chainId the current chain id
  */
 export function activeListeningKeys(
-  allListeners: AppState["multicall"]["callListeners"],
+  allListeners: AppState['multicall']['callListeners'],
   chainId?: number
 ): { [callKey: string]: number } {
   if (!allListeners || !chainId) return {};
@@ -88,7 +87,7 @@ export function activeListeningKeys(
  * @param latestBlockNumber the latest block number
  */
 export function outdatedListeningKeys(
-  callResults: AppState["multicall"]["callResults"],
+  callResults: AppState['multicall']['callResults'],
   listeningKeys: { [callKey: string]: number },
   chainId: number | undefined,
   latestBlockNumber: number | undefined
@@ -117,7 +116,7 @@ export function outdatedListeningKeys(
 
 export default function Updater(): null {
   const dispatch = useDispatch<AppDispatch>();
-  const state = useSelector<AppState, AppState["multicall"]>((state) => state.multicall);
+  const state = useSelector<AppState, AppState['multicall']>((state) => state.multicall);
   // wait for listeners to settle before triggering updates
   const debouncedListeners = useDebounce(state.callListeners, 100);
   const latestBlockNumber = useBlockNumber();
@@ -155,7 +154,7 @@ export default function Updater(): null {
       fetchingMulticallResults({
         calls,
         chainId,
-        fetchingBlockNumber: latestBlockNumber
+        fetchingBlockNumber: latestBlockNumber,
       })
     );
 
@@ -165,7 +164,7 @@ export default function Updater(): null {
         const { cancel, promise } = retry(() => fetchChunk(multicallContract, chunk, latestBlockNumber), {
           n: Infinity,
           minWait: 2500,
-          maxWait: 3500
+          maxWait: 3500,
         });
         promise
           .then(({ results: returnData, blockNumber: fetchBlockNumber }) => {
@@ -186,26 +185,26 @@ export default function Updater(): null {
                     memo[callKey] = returnData[i] ?? null;
                     return memo;
                   }, {}),
-                blockNumber: fetchBlockNumber
+                blockNumber: fetchBlockNumber,
               })
             );
           })
           .catch((error: any) => {
             if (error instanceof CancelledError) {
-              console.debug("Cancelled fetch for blockNumber", latestBlockNumber);
+              console.debug('Cancelled fetch for blockNumber', latestBlockNumber);
               return;
             }
-            console.error("Failed to fetch multicall chunk", chunk, chainId, error);
+            console.error('Failed to fetch multicall chunk', chunk, chainId, error);
             dispatch(
               errorFetchingMulticallResults({
                 calls: chunk,
                 chainId,
-                fetchingBlockNumber: latestBlockNumber
+                fetchingBlockNumber: latestBlockNumber,
               })
             );
           });
         return cancel;
-      })
+      }),
     };
   }, [chainId, multicallContract, dispatch, serializedOutdatedCallKeys, latestBlockNumber]);
 

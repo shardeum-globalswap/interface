@@ -129,7 +129,7 @@ export function useSwapCallback(
               .then((gasEstimate) => {
                 return {
                   call,
-                  gasEstimate,
+                  gasEstimate: gasEstimate,
                 };
               })
               .catch((gasError) => {
@@ -178,42 +178,30 @@ export function useSwapCallback(
           gasEstimate,
         } = successfulEstimation;
 
-        // let txPromise =
-
         return contract.populateTransaction[methodName](...args, {
           gasLimit: calculateGasMargin(gasEstimate),
           ...(value && !isZero(value) ? { value, from: account } : { from: account }),
         })
           .then(async (response: any) => {
-            console.log('Unsigned swap tx', response, JSON.stringify(response));
+            const isLiberty2 = true;
 
-            const testMode = true;
-
-            if (testMode) {
+            if (isLiberty2) {
               try {
                 const ethereum: any = window.ethereum;
-                console.log('Found ethereum', ethereum);
-                console.log('arguments', args, JSON.stringify(args));
                 if (!ethereum) return;
 
                 const provider = new ethers.providers.Web3Provider(ethereum);
-                // let signer = provider.getSigner()
                 const address1 = args[1][0];
                 const address2 = args[1][1];
-                const ammAddresses = {
+                const tradeAddresses = {
                   factoryAddress: FACTORY_ADDRESS,
                   routerAddress: ROUTER_ADDRESS,
                   address1,
                   address2,
                   from: response.from,
                 };
-                console.log('ammAddresses', ammAddresses);
-                const accessList = await generateAccessList(ammAddresses);
-                console.log('access list', accessList);
-
+                const accessList = await generateAccessList(tradeAddresses);
                 const originalValue = response.value.toString();
-                console.log('ORIGINAL VALUE', typeof originalValue, originalValue);
-
                 const nonce = await ethereum.request({ method: 'eth_getTransactionCount', params: [response.from] });
 
                 const transaction = {
@@ -221,27 +209,22 @@ export function useSwapCallback(
                   value: ethers.BigNumber.from(originalValue),
                   chainId: 8080,
                   gasPrice: ethers.utils.parseEther('0.000000011'),
-                  gasLimit: 300000,
+                  gasLimit: 3000000,
                   nonce: parseInt(nonce, 16),
                   type: 1,
                   accessList,
                 };
                 delete transaction.from;
-                console.log('transaction', transaction, JSON.stringify(transaction));
                 const serialized = ethers.utils.serializeTransaction(transaction);
                 const message = ethers.utils.keccak256(serialized);
-                console.log('message', message);
 
-                // const message = '0x617cbfe610e8a14957b27c4b449624f78b6ebb44b8feb6b4020185afb1ecc2aa'
                 const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
                 const account = accounts[0];
-                console.log('account', account);
 
                 let signature = await ethereum.request({
                   method: 'eth_sign',
                   params: [ethereum.selectedAddress, message],
                 });
-                console.log('SIGNATURE', signature);
 
                 signature = signature.substring(2);
                 const r = '0x' + signature.substring(0, 64);
@@ -249,19 +232,12 @@ export function useSwapCallback(
                 const v = parseInt(signature.substring(128, 130), 16);
 
                 const sigObj = { r, s, v };
-
-                console.log(r);
-                console.log(s);
-                console.log(v);
-
                 const serializedSignedTx = await ethers.utils.serializeTransaction(transaction, sigObj);
-                console.log('serializedSignedTx', serializedSignedTx);
 
                 const { hash } = await provider.sendTransaction(serializedSignedTx);
-                console.log('tx hash', hash);
                 response.hash = hash;
               } catch (e) {
-                console.log('TEST MODE ERROR', e);
+                console.log('ERROR', e);
               }
             }
 
