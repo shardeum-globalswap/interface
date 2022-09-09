@@ -126,7 +126,6 @@ export function isTokenOnList(defaultTokens: TokenAddressMap, currency?: Currenc
 
 function getNestedStorageKey(key1: string, key2: string, slotOfMap: string) {
   const firstLevelKey = ethers.utils.solidityKeccak256(['uint', 'uint'], [key1, slotOfMap]);
-
   return ethers.utils.solidityKeccak256(['uint', 'uint'], [key2, firstLevelKey]);
 }
 
@@ -183,8 +182,6 @@ export async function generateAccessList(tradeAddresses: any) {
   const { routerAddress, factoryAddress, address1, address2, from } = tradeAddresses;
   const account = from;
   const pairAddress = getPair(address1, address2, factoryAddress, ammAddresses.codeHash);
-
-  console.log('Pair address', pairAddress);
   // const pairHash = ethers.utils.keccak256(Buffer.from(PAIR.deployedBytecode.slice(2), 'hex'));
   const zeroAddress = '0x' + '0'.repeat(40);
   const balanceMapSlot = '0x1';
@@ -218,7 +215,7 @@ export async function generateAccessList(tradeAddresses: any) {
         '0x000000000000000000000000000000000000000000000000000000000000000c',
         senderBalanceKey,
         pairBalanceKey,
-        '0xb2b81c15af25defa7f931953dc35a7a411b46f9e890702354a2899d421608c23',
+        '0xb2b81c15af25defa7f931953dc35a7a411b46f9e890702354a2899d421608c23', // codeHash of pair contract
       ],
     ],
     [
@@ -245,7 +242,7 @@ export async function generateAccessList(tradeAddresses: any) {
         token_0_1_key,
         token_1_0_key,
         allPairKey,
-        '0x3ceed391ae304e8dc31737fba00513c69846aba35d763fe6a069afbbbd727ca3',
+        '0x3ceed391ae304e8dc31737fba00513c69846aba35d763fe6a069afbbbd727ca3', // codeHash of factory contract
       ],
     ],
   ];
