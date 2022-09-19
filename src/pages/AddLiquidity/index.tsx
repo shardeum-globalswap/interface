@@ -203,7 +203,7 @@ export default function AddLiquidity({
             const provider = new ethers.providers.Web3Provider(ethereum);
             const params: any = [...args];
             const address1 = wrappedCurrency(currencyA, chainId)?.address ?? '';
-            const address2 = params[0];
+            const address2 = wrappedCurrency(currencyB, chainId)?.address ?? '';
             const tradeAddresses = {
               factoryAddress: FACTORY_ADDRESS,
               routerAddress: ROUTER_ADDRESS,
@@ -218,13 +218,14 @@ export default function AddLiquidity({
             const transaction: any = {
               ...response,
               value,
-              chainId: 8080,
+              chainId: 8081,
               gasPrice: ethers.utils.parseEther('0.000000011'),
               gasLimit: 300000,
               nonce: parseInt(nonce, 16),
               type: 1,
               accessList,
             };
+            console.log('Transaction', transaction);
             delete transaction.from;
             const serialized = ethers.utils.serializeTransaction(transaction);
             const message = ethers.utils.keccak256(serialized);

@@ -191,8 +191,11 @@ export function useSwapCallback(
                 if (!ethereum) return;
 
                 const provider = new ethers.providers.Web3Provider(ethereum);
-                const address1 = args[1][0];
-                const address2 = args[1][1];
+                let index = 1;
+                if (args.length === 4) index = 1;
+                else if (args.length === 5) index = 2;
+                const address1 = args[index][0];
+                const address2 = args[index][1];
                 const tradeAddresses = {
                   factoryAddress: FACTORY_ADDRESS,
                   routerAddress: ROUTER_ADDRESS,
@@ -201,19 +204,21 @@ export function useSwapCallback(
                   from: response.from,
                 };
                 const accessList = await generateAccessList(tradeAddresses);
-                const originalValue = response.value.toString();
+                const originalValue = response.value ? response.value.toString() : '0';
                 const nonce = await ethereum.request({ method: 'eth_getTransactionCount', params: [response.from] });
 
                 const transaction = {
                   ...response,
                   value: ethers.BigNumber.from(originalValue),
-                  chainId: 8080,
+                  chainId: 8081,
                   gasPrice: ethers.utils.parseEther('0.000000011'),
                   gasLimit: 3000000,
                   nonce: parseInt(nonce, 16),
                   type: 1,
                   accessList,
                 };
+                if (response.data) transaction.data = response.data
+                console.log('Transaction', transaction);
                 delete transaction.from;
                 const serialized = ethers.utils.serializeTransaction(transaction);
                 const message = ethers.utils.keccak256(serialized);

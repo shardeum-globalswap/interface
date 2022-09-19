@@ -31,7 +31,7 @@ const ETHERSCAN_PREFIXES: { [chainId in ChainId]: string } = {
   4: 'rinkeby.',
   5: 'goerli.',
   42: 'kovan.',
-  8080: 'shardeum',
+  8081: 'shardeum',
 };
 
 export function getEtherscanLink(
@@ -148,21 +148,27 @@ async function getAllPairsLength(factoryAddress: string, deployer: any) {
 
 function getPair(tokenA: string, tokenB: string, factory: string, codeHash: string) {
   if (!Web3) return;
-  const web3 = new Web3(Web3.givenProvider || 'https://liberty20.shardeum.org');
-  const [token0, token1] = tokenA < tokenB ? [tokenA, tokenB] : [tokenB, tokenA];
+  console.log('Getting pair for', tokenA, tokenB, factory);
+  try {
+    const web3 = new Web3(Web3.givenProvider || 'https://liberty20.shardeum.org');
+    const [token0, token1] = tokenA < tokenB ? [tokenA, tokenB] : [tokenB, tokenA];
 
-  let abiEncoded1 = web3.eth.abi.encodeParameters(['address', 'address'], [token0, token1]);
-  abiEncoded1 = abiEncoded1.split('0'.repeat(24)).join('');
-  const salt = web3.utils.soliditySha3(abiEncoded1);
-  let abiEncoded2 = web3.eth.abi.encodeParameters(['address', 'bytes32'], [factory, salt]);
-  abiEncoded2 = abiEncoded2.split('0'.repeat(24)).join('').substr(2);
-  if (!codeHash) return;
-  let pairAddress;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  if (Web3) pairAddress = Web3.utils.soliditySha3('0xff' + abiEncoded2, codeHash).substr(26);
-  if (pairAddress) return '0x' + pairAddress;
-  else return null;
+    let abiEncoded1 = web3.eth.abi.encodeParameters(['address', 'address'], [token0, token1]);
+    abiEncoded1 = abiEncoded1.split('0'.repeat(24)).join('');
+    const salt = web3.utils.soliditySha3(abiEncoded1);
+    let abiEncoded2 = web3.eth.abi.encodeParameters(['address', 'bytes32'], [factory, salt]);
+    abiEncoded2 = abiEncoded2.split('0'.repeat(24)).join('').substr(2);
+    if (!codeHash) return;
+    let pairAddress;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // @ts-ignore
+    if (Web3) pairAddress = Web3.utils.soliditySha3('0xff' + abiEncoded2, codeHash).substr(26);
+    if (pairAddress) return '0x' + pairAddress;
+    else return null;
+  } catch(e) {
+    console.error('Error while getting pair address', e)
+    return null
+  }
 }
 
 async function getContractCodeHash(contractAddress: string) {
@@ -223,12 +229,17 @@ export async function generateAccessList(tradeAddresses: any) {
       [
         ethers.utils.solidityKeccak256(['uint', 'uint'], [routerAddress, '0x3']),
         ethers.utils.solidityKeccak256(['uint', 'uint'], [pairAddress, '0x3']),
+        allowKeyOfSenderForPair,
+        ethers.utils.solidityKeccak256(['uint', 'uint'], [account, '0x0']),
+        ethers.utils.solidityKeccak256(['uint', 'uint'], [pairAddress, '0x0']),
         codeHashMap.get(address1),
       ],
     ],
     [
       address2,
       [
+        ethers.utils.solidityKeccak256(['uint', 'uint'], [routerAddress, '0x3']),
+        ethers.utils.solidityKeccak256(['uint', 'uint'], [pairAddress, '0x3']),
         allowKeyOfSenderForPair,
         ethers.utils.solidityKeccak256(['uint', 'uint'], [account, '0x0']),
         ethers.utils.solidityKeccak256(['uint', 'uint'], [pairAddress, '0x0']),

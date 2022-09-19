@@ -1,20 +1,19 @@
-import { toChecksumAddress } from "web3-utils";
-import DEFAULT_TOKEN_LIST from "@uniswap/default-token-list";
-import { ChainId, Token } from "@uniswap/sdk";
-import { Tags, TokenInfo, TokenList } from "@uniswap/token-lists";
-import { useMemo } from "react";
-import { useSelector } from "react-redux";
-import { AppState } from "../index";
-import sortByListPriority from "utils/listSort";
+import { toChecksumAddress } from 'web3-utils';
+import DEFAULT_TOKEN_LIST from '@uniswap/default-token-list';
+import { ChainId, Token } from '@uniswap/sdk';
+import { Tags, TokenInfo, TokenList } from '@uniswap/token-lists';
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { AppState } from '../index';
+import sortByListPriority from 'utils/listSort';
 
-DEFAULT_TOKEN_LIST.tokens = DEFAULT_TOKEN_LIST.tokens.filter(t => t.chainId === 8080);
+DEFAULT_TOKEN_LIST.tokens = DEFAULT_TOKEN_LIST.tokens.filter((t) => t.chainId === 8081);
 
 type TagDetails = Tags[keyof Tags];
 
 export interface TagInfo extends TagDetails {
   id: string;
 }
-
 
 /**
  * Token instances created from token info.
@@ -40,7 +39,9 @@ export class WrappedTokenInfo extends Token {
   }
 }
 
-export type TokenAddressMap = Readonly<{ [chainId in ChainId]: Readonly<{ [tokenAddress: string]: { token: WrappedTokenInfo; list: TokenList } }> }>;
+export type TokenAddressMap = Readonly<
+  { [chainId in ChainId]: Readonly<{ [tokenAddress: string]: { token: WrappedTokenInfo; list: TokenList } }> }
+>;
 
 /**
  * An empty result, useful as a default.
@@ -51,11 +52,11 @@ const EMPTY_LIST: TokenAddressMap = {
   [ChainId.ROPSTEN]: {},
   [ChainId.GÖRLI]: {},
   [ChainId.MAINNET]: {},
-  8080: {}
+  8081: {}
 };
 
 const listCache: WeakMap<TokenList, TokenAddressMap> | null =
-  typeof WeakMap !== "undefined" ? new WeakMap<TokenList, TokenAddressMap>() : null;
+  typeof WeakMap !== 'undefined' ? new WeakMap<TokenList, TokenAddressMap>() : null;
 
 export function listToTokenMap(list: TokenList): TokenAddressMap {
   // const result = listCache?.get(list);
@@ -77,16 +78,16 @@ export function listToTokenMap(list: TokenList): TokenAddressMap {
       // console.log('wrapped token info', token)
       // console.log('tokenMap', tokenMap)
       if (!tokenMap[token.chainId]) return tokenMap;
-      if (tokenMap[token.chainId][token.address] !== undefined) throw Error("Duplicate tokens.");
+      if (tokenMap[token.chainId][token.address] !== undefined) throw Error('Duplicate tokens.');
       return {
         ...tokenMap,
         [token.chainId]: {
           ...tokenMap[token.chainId],
           [token.address]: {
             token,
-            list: list
-          }
-        }
+            list: list,
+          },
+        },
       };
     },
     { ...EMPTY_LIST }
@@ -103,7 +104,7 @@ export function useAllLists(): {
     readonly error: string | null;
   };
 } {
-  return useSelector<AppState, AppState["lists"]["byUrl"]>((state) => state.lists.byUrl);
+  return useSelector<AppState, AppState['lists']['byUrl']>((state) => state.lists.byUrl);
 }
 
 function combineMaps(map1: TokenAddressMap, map2: TokenAddressMap): TokenAddressMap {
@@ -113,7 +114,7 @@ function combineMaps(map1: TokenAddressMap, map2: TokenAddressMap): TokenAddress
     4: { ...map1[4], ...map2[4] },
     5: { ...map1[5], ...map2[5] },
     42: { ...map1[42], ...map2[42] },
-    8080: { ...map1[8080], ...map2[8080] }
+    8081: { ...map1[8081], ...map2[8081] },
   };
 }
 
@@ -136,7 +137,7 @@ function useCombinedTokenMapFromUrls(urls: string[] | undefined): TokenAddressMa
             // const newTokens = Object.assign(listToTokenMap(current));
             return combineMaps(allTokens, allTokens);
           } catch (error) {
-            console.error("Could not show token list due to error", error);
+            console.error('Could not show token list due to error', error);
             return allTokens;
           }
         }, EMPTY_LIST)
@@ -146,7 +147,7 @@ function useCombinedTokenMapFromUrls(urls: string[] | undefined): TokenAddressMa
 
 // filter out unsupported lists
 export function useActiveListUrls(): string[] | undefined {
-  return useSelector<AppState, AppState["lists"]["activeListUrls"]>((state) => state.lists.activeListUrls);
+  return useSelector<AppState, AppState['lists']['activeListUrls']>((state) => state.lists.activeListUrls);
 }
 
 export function useInactiveListUrls(): string[] {
@@ -171,7 +172,7 @@ export function useCombinedInactiveList(): TokenAddressMap {
 
 // used to hide warnings on import for default tokens
 export function useDefaultTokenList(): TokenAddressMap {
-  console.log("Using default token list");
+  console.log('Using default token list');
   return listToTokenMap(DEFAULT_TOKEN_LIST);
 }
 

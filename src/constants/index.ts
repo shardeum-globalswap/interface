@@ -16,7 +16,7 @@ export const ammAddresses = {
   daiCodeHash: '0x8066a4dac9c48b171b3aec8bfb10db23409617b8d8cc77acd57d766f7cc4f400',
   codeHash: '0x8fadc34b7067b13328c76294c8b73f195b1b0ffe1b6e57326a4812a78555b7d7',
   routerAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
-  multicallAddress: '0xa513E6E4b8f2a923D98304ec87F64353C4D5C853',
+  multicallAddress: '0x0165878A594ca255338adfa4d48449f69242Eb8F',
 };
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
