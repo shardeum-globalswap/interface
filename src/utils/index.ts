@@ -14,11 +14,11 @@ import Web3 from 'web3';
 
 const codeHashMap: any = new Map();
 codeHashMap.set(
-  '0x914907D9ED74e420D621B312a3F9487815D43d8b',
+  '0xf7A1c4A0C30d91C2A644d28FB20D4882AB8bc0cf',
   '0xe215ad4f669e26abc5ebd692a4ae33cac42bbdbf1453033f490701c4533588bf'
 );
 codeHashMap.set(
-  '0xEadcbd9115Eb06698ba6e1Cd7BB4C6381f9E6729',
+  '0x4801AB04c9933b5E2643AA3EFcd113d7DB92C44B',
   '0x8066a4dac9c48b171b3aec8bfb10db23409617b8d8cc77acd57d766f7cc4f400'
 );
 

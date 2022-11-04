@@ -168,25 +168,9 @@ export default function AddLiquidity({
     setAttemptingTxn(true);
     await estimate(...args, value ? { value } : {})
       .then(async (estimatedGasLimit) => {
-        // const txPromise = method(...args, {
-        //   ...(value ? { value } : {}),
-        //   gasLimit: calculateGasMargin(estimatedGasLimit),
-        // });
-        //
-        // const contract = router;
-        // const params = [
-        //   ...args,
-        //   {
-        //     ...(value ? { value } : {}),
-        //     gasLimit: calculateGasMargin(estimatedGasLimit),
-        //   },
-        // ];
-        // const unsignedTx = contract.populateTransaction['addLiquidity'](...params);
-        // console.log('unsignedTx', unsignedTx);
-
-        const testMode = true;
+        const isLiberty2 = false;
         let txPromise;
-        if (testMode) {
+        if (isLiberty2) {
           try {
             const ethereum: any = window.ethereum;
             console.log('Found ethereum', ethereum);
@@ -261,29 +245,33 @@ export default function AddLiquidity({
 
             txPromise = provider.sendTransaction(serializedSignedTx);
           } catch (e) {
-            console.log('TEST MODE ERROR', e);
+            console.log('Liberty 2.0 ERROR', e);
           }
+          return txPromise;
+        } else {
+          return estimatedGasLimit
         }
-
-        // await Wallet.sendTransaction(unsignedTx);
-        return txPromise;
       })
-      .then((response: any) => {
-        setAttemptingTxn(false);
+      .then((estimatedGasLimit: any) => {
+        method(...args, {
+          ...(value ? { value } : {}),
+          gasLimit: calculateGasMargin(estimatedGasLimit),
+        }).then((response) => {
+          setAttemptingTxn(false);
 
-        addTransaction(response, {
-          summary:
-            'Add ' +
-            parsedAmounts[Field.CURRENCY_A]?.toSignificant(3) +
-            ' ' +
-            currencies[Field.CURRENCY_A]?.symbol +
-            ' and ' +
-            parsedAmounts[Field.CURRENCY_B]?.toSignificant(3) +
-            ' ' +
-            currencies[Field.CURRENCY_B]?.symbol,
-        });
-
-        setTxHash(response.hash);
+          addTransaction(response, {
+            summary:
+              'Add ' +
+              parsedAmounts[Field.CURRENCY_A]?.toSignificant(3) +
+              ' ' +
+              currencies[Field.CURRENCY_A]?.symbol +
+              ' and ' +
+              parsedAmounts[Field.CURRENCY_B]?.toSignificant(3) +
+              ' ' +
+              currencies[Field.CURRENCY_B]?.symbol,
+          });
+          setTxHash(response.hash);
+        })
       })
       .catch((error) => {
         setAttemptingTxn(false);

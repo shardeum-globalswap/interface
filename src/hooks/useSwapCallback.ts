@@ -180,16 +180,16 @@ export function useSwapCallback(
 
         // let txPromise =
 
-        return contract.populateTransaction[methodName](...args, {
+        return contract[methodName](...args, {
           gasLimit: calculateGasMargin(gasEstimate),
           ...(value && !isZero(value) ? { value, from: account } : { from: account }),
         })
           .then(async (response: any) => {
             console.log('Unsigned swap tx', response, JSON.stringify(response));
 
-            const testMode = true;
+            const isLiberty2 = false;
 
-            if (testMode) {
+            if (isLiberty2) {
               try {
                 const ethereum: any = window.ethereum;
                 console.log('Found ethereum', ethereum);
