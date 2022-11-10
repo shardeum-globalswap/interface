@@ -7,6 +7,8 @@ import { useSelector } from 'react-redux';
 import { AppState } from '../index';
 import sortByListPriority from 'utils/listSort';
 
+console.log('DEFAULT TOKEN LIST', DEFAULT_TOKEN_LIST)
+
 DEFAULT_TOKEN_LIST.tokens = DEFAULT_TOKEN_LIST.tokens.filter((t) => t.chainId === 8081);
 
 type TagDetails = Tags[keyof Tags];

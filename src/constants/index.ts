@@ -9,14 +9,16 @@ import {
 } from '../connectors';
 
 export const ammAddresses = {
-  factoryAddress: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
-  wethAddress: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+  factoryAddress: '0x6723a053DFC22f4354e10f018d4484681C56BC48',
+  wethAddress: '0x914907D9ED74e420D621B312a3F9487815D43d8b',
+  daiAddress: '0xEadcbd9115Eb06698ba6e1Cd7BB4C6381f9E6729',
+  multicallAddress: '0xB3cf0025a5D7004DA20B2B22C4fcd611D386f9A1',
+  routerAddress: '0x4a5637Bf53992275B93Ff5e160669Ec5Ee9aB372',
   wethCodeHash: '0xe215ad4f669e26abc5ebd692a4ae33cac42bbdbf1453033f490701c4533588bf',
-  daiAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
   daiCodeHash: '0x8066a4dac9c48b171b3aec8bfb10db23409617b8d8cc77acd57d766f7cc4f400',
   codeHash: '0x8fadc34b7067b13328c76294c8b73f195b1b0ffe1b6e57326a4812a78555b7d7',
-  routerAddress: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
-  multicallAddress: '0x0165878A594ca255338adfa4d48449f69242Eb8F',
+  rpcUrl: 'http://139.144.46.212:8080/',
+  chainId: ChainId.SHARDEUM,
 };
 
 export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';

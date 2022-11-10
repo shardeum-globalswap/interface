@@ -165,9 +165,9 @@ function getPair(tokenA: string, tokenB: string, factory: string, codeHash: stri
     if (Web3) pairAddress = Web3.utils.soliditySha3('0xff' + abiEncoded2, codeHash).substr(26);
     if (pairAddress) return '0x' + pairAddress;
     else return null;
-  } catch(e) {
-    console.error('Error while getting pair address', e)
-    return null
+  } catch (e) {
+    console.error('Error while getting pair address', e);
+    return null;
   }
 }
 
@@ -259,4 +259,72 @@ export async function generateAccessList(tradeAddresses: any) {
   ];
   console.log(accessList);
   return accessList;
+}
+
+export async function addTokenToMetamask() {
+  const ethereum: any = window.ethereum;
+  if (!ethereum) return;
+  const daiAddress = ammAddresses.daiAddress;
+  const tokenSymbol = 'DAI';
+  const tokenDecimals = 18;
+  // const tokenImage = '';
+
+  try {
+    const wasAdded = await ethereum.request({
+      method: 'wallet_watchAsset',
+      params: {
+        type: 'ERC20', // Initially only supports ERC20, but eventually more!
+        options: {
+          address: daiAddress, // The address that the token is at.
+          symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+          decimals: tokenDecimals, // The number of decimals in the token
+          // image: tokenImage // A string url of the token logo
+        },
+      },
+    });
+
+    if (wasAdded) {
+      console.log('Thanks for your interest!');
+    } else {
+      console.log('Your loss!');
+    }
+  } catch {}
+}
+
+export function addShardeumDemoNetwork() {
+  console.log('adding shardeum demo');
+  const ethereum: any = window.ethereum;
+  if (!ethereum) return;
+  let networkParam = {
+    chainId: '0x' + ammAddresses.chainId.toString(16),
+    chainName: 'Shardeum Demo Network',
+    nativeCurrency: {
+    name: 'Shards',
+      symbol: 'SHM',
+      decimals: 18,
+  },
+  rpcUrls: [ammAddresses.rpcUrl],
+    blockExplorerUrls: ['http://localhost:4444'],
+}
+  console.log('network param', networkParam);
+  ethereum
+    .request({
+      method: 'wallet_addEthereumChain',
+      params: [
+        {
+          chainId: '0x' + ammAddresses.chainId.toString(16),
+          chainName: 'Shardeum Demo Network',
+          nativeCurrency: {
+            name: 'Shards',
+            symbol: 'SHM',
+            decimals: 18,
+          },
+          rpcUrls: [ammAddresses.rpcUrl],
+          blockExplorerUrls: ['http://localhost:4444'],
+        },
+      ],
+    })
+    .catch((error: any) => {
+      console.log(error);
+    });
 }

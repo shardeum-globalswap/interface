@@ -18,6 +18,7 @@ import RemoveLiquidity from './RemoveLiquidity';
 import { RedirectOldRemoveLiquidityPathStructure } from './RemoveLiquidity/redirects';
 import Swap from './Swap';
 import { OpenClaimAddressModalAndRedirectToSwap, RedirectPathToSwapOnly } from './Swap/redirects';
+import { addShardeumDemoNetwork, addTokenToMetamask } from '../utils';
 
 const AppWrapper = styled.div`
   min-height: 100vh;
@@ -76,6 +77,18 @@ export default function App() {
               <Route component={RedirectPathToSwapOnly} />
             </Switch>
           </Web3ReactManager>
+          <div style={{ display: 'flex', marginTop: '10px' }}>
+            {/*<div style={{ fontSize: '13px', padding: '5px', margin: '5px' }}>*/}
+            {/*  <a style={{ cursor: 'pointer' }} onClick={addShardeumDemoNetwork}>*/}
+            {/*    Add Demo Network*/}
+            {/*  </a>*/}
+            {/*</div>*/}
+            <div style={{ fontSize: '13px', padding: '5px', margin: '5px' }}>
+              <a style={{ cursor: 'pointer' }} onClick={addTokenToMetamask}>
+                Add DAI token
+              </a>
+            </div>
+          </div>
         </BodyWrapper>
       </AppWrapper>
     </Suspense>
