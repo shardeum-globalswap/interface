@@ -1,7 +1,22 @@
-# Uniswap-UI-fork template
+# GlobalSwap UI Setup
 
-### Rinkeby
+## Setup sdk core page
+- Clone https://github.com/shardeum-globalswap/globalswap-sdk.git
+- Open src/constants.ts file and update `FACTORY_ADDRESS`, `INIT_CODE_HASH`, `ChainId` as needed
+- Rebuild the changes with `npm run build`
+- Locally link with `npm link`
 
-- Factory: 0x6Bd5A1A63ffF10De3c6B7C667040E9AE1B47fDf2
-- Router: 0xA4E1f3fD10E2397f58926E215Ed331D7cDA14056
-- Pair hash: 0xaf88dd15a55596feb9d67243c727bfd6144af12453963809bc91f0cfcf8241bc
+## Setup default-token-list
+- Clone https://github.com/shardeum-globalswap/default-token-list.git
+- Open src/tokens/shardeum.json file and update the token information as needed
+- Rebuild the changes with `npm run build`
+- Locally link with `npm link`
+
+## Start GlobalSwap UI
+- Clone global swap interface repo. https://github.com/shardeum-globalswap/interface.git
+- Open `src/constants/index.ts` file and update `FACTORY_ADDRESS` and `ROUTER_ADDRESS`
+- Open `src/constants/multicall/index.ts` file and update multicall contract address for shardeum
+- Install witn `npm install`
+- Link sdk core `npm link @uniswap/sdk`
+- Link default token list `npm link @uniswap-default-token-list`
+- Start dev server `npm start`
